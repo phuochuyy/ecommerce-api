@@ -1,87 +1,71 @@
 # E-commerce API
 
-A modern Node.js/Express REST API for an e-commerce application built with Prisma ORM and PostgreSQL.
+A REST API for an e-commerce application built with Node.js, Express, and Prisma ORM.
 
 ## Features
 
-- 🔐 JWT-based authentication (register, login, logout)
-- 📦 Product management with CRUD operations
-- 🔍 Advanced product filtering, search, and pagination
-- 🛒 Shopping cart functionality
-- 👑 Admin role for product management
-- ✅ Input validation and comprehensive error handling
-- 🌐 CORS support for frontend integration
+- User authentication with JWT
+- Product management with CRUD operations
+- Product filtering, search, and pagination
+- Shopping cart functionality
+- Admin role for product management
+- Input validation and error handling
+- CORS support
 
-## Tech Stack
+## Technology Stack
 
-- **Runtime:** Node.js (ES Modules)
-- **Framework:** Express.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma 7
-- **Authentication:** JWT (JSON Web Tokens)
-- **Validation:** express-validator
-- **Containerization:** Docker & Docker Compose
+- Node.js with ES Modules
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- JWT for authentication
+- Docker and Docker Compose
 
 ## Prerequisites
 
 - Node.js v18 or higher
 - Docker and Docker Compose
-- npm or yarn
+- npm
 
-## Quick Start
+## Getting Started
 
-### 1. Install Dependencies
+### Installation
 
-```bash
+Install dependencies:
+```
 npm install
 ```
 
-### 2. Environment Setup
+### Environment Setup
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory with the following variables:
 
-```env
-# Server Configuration
+```
 PORT=3000
 NODE_ENV=development
-
-# Database Configuration (Prisma)
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce
-
-# JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
-
-# CORS Configuration
 CORS_ORIGIN=http://localhost:5173
 ```
 
-**Important:** Change `JWT_SECRET` to a secure random string in production!
+### Database Setup
 
-### 3. Start Database
-
-```bash
+Start the PostgreSQL database:
+```
 docker compose up -d
 ```
 
-**Note:** If you get a permission denied error:
-- Add your user to docker group: `sudo usermod -aG docker $USER` (then logout/login)
-- Or use: `sudo docker compose up -d`
-
-### 4. Setup Database
-
 Generate Prisma Client and run migrations:
-
-```bash
+```
 npm run prisma:generate
 npm run prisma:migrate
 ```
 
-When prompted for a migration name, enter: `init` or `create_initial_schema`
+### Running the Server
 
-### 5. Start Development Server
-
-```bash
+Start the development server:
+```
 npm run dev
 ```
 
@@ -91,232 +75,93 @@ The API will be available at `http://localhost:3000`
 
 ### Authentication
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/auth/register` | Register a new user | No |
-| POST | `/auth/login` | Login user | No |
-| POST | `/auth/logout` | Logout user | Yes |
+- POST `/auth/register` - Register a new user
+- POST `/auth/login` - Login user
+- POST `/auth/logout` - Logout user
 
 ### Products
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/products` | Get all products (with filters) | No |
-| GET | `/products/:id` | Get product by ID | No |
-| POST | `/products` | Create product | Admin |
-| PUT | `/products/:id` | Update product | Admin |
-| DELETE | `/products/:id` | Delete product | Admin |
+- GET `/products` - Get all products with optional filtering
+- GET `/products/:id` - Get product by ID
+- POST `/products` - Create product (Admin only)
+- PUT `/products/:id` - Update product (Admin only)
+- DELETE `/products/:id` - Delete product (Admin only)
 
 ### Cart
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/cart` | Get user cart | Yes |
-| POST | `/cart/items` | Add item to cart | Yes |
-| PUT | `/cart/items/:productId` | Update cart item quantity | Yes |
-| DELETE | `/cart/items/:productId` | Remove item from cart | Yes |
-| DELETE | `/cart` | Clear cart | Yes |
+- GET `/cart` - Get user cart
+- POST `/cart/items` - Add item to cart
+- PUT `/cart/items/:productId` - Update cart item quantity
+- DELETE `/cart/items/:productId` - Remove item from cart
+- DELETE `/cart` - Clear cart
 
 ## Query Parameters
 
-### Products Endpoint
+The products endpoint supports the following query parameters:
 
-- `category` - Filter by category (e.g., "electronics")
-- `search` - Search in product name/description
+- `category` - Filter by category
+- `search` - Search in product name or description
 - `page` - Page number (default: 1)
 - `limit` - Items per page (default: 20)
-- `sort` - Sort field: `id`, `name`, `price`, `rating`, `createdAt` (default: `id`)
-- `order` - Sort order: `asc` or `desc` (default: `asc`)
-
-**Example:**
-```
-GET /products?category=electronics&search=laptop&page=1&limit=20&sort=price&order=desc
-```
+- `sort` - Sort field: id, name, price, rating, createdAt
+- `order` - Sort order: asc or desc
 
 ## Authentication
 
 Include the JWT token in the Authorization header:
-
 ```
-Authorization: Bearer <your-token>
-```
-
-## Creating an Admin User
-
-After registering a user, connect to the database and update the role:
-
-```bash
-docker exec -it ecommerce-postgres psql -U postgres -d ecommerce
-```
-
-Then run:
-
-```sql
-UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
+Authorization: Bearer <token>
 ```
 
 ## Project Structure
 
 ```
-ecommerce-api/
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── migrations/            # Database migrations
-├── src/
-│   ├── config/
-│   │   └── database.js        # Prisma client configuration
-│   ├── controllers/           # HTTP request/response handlers
-│   │   ├── authController.js
-│   │   ├── productController.js
-│   │   └── cartController.js
-│   ├── services/              # Business logic layer
-│   │   ├── authService.js
-│   │   ├── productService.js
-│   │   └── cartService.js
-│   ├── routes/                # Route definitions
-│   │   ├── authRoutes.js
-│   │   ├── productRoutes.js
-│   │   └── cartRoutes.js
-│   ├── middleware/            # Express middleware
-│   │   ├── auth.js            # JWT authentication
-│   │   ├── validation.js     # Input validation
-│   │   └── errorHandler.js   # Error handling
-│   ├── utils/                 # Utility functions
-│   │   ├── constants.js       # App constants
-│   │   ├── errors.js          # Custom error classes
-│   │   └── helpers.js         # Helper functions
-│   └── server.js              # Express server setup
-├── docker-compose.yml         # PostgreSQL database setup
-└── package.json
+src/
+├── config/          Configuration files
+├── controllers/     HTTP request/response handlers
+├── services/        Business logic layer
+├── routes/          Route definitions
+├── middleware/      Express middleware
+├── utils/           Utility functions
+└── server.js        Express server setup
 ```
-
-### Architecture
-
-The project follows a **layered architecture** pattern:
-
-- **Routes**: Define endpoints and call controllers
-- **Controllers**: Handle HTTP requests/responses, call services
-- **Services**: Contain business logic and database operations
-- **Middleware**: Authentication, validation, and error handling
-- **Utils**: Reusable helper functions and constants
-
-This separation of concerns makes the codebase:
-- ✅ More maintainable
-- ✅ Easier to test
-- ✅ More scalable
-- ✅ Better organized
 
 ## Available Scripts
 
 - `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
+- `npm run dev` - Start development server
 - `npm run prisma:generate` - Generate Prisma Client
-- `npm run prisma:migrate` - Create and run database migrations (development)
+- `npm run prisma:migrate` - Run database migrations
 - `npm run prisma:deploy` - Deploy migrations (production)
-- `npm run prisma:studio` - Open Prisma Studio (database GUI)
+- `npm run prisma:studio` - Open Prisma Studio
 
-## Testing the API
+## Database
 
-### Using curl
+The database schema is defined in `prisma/schema.prisma`. The schema includes:
 
-```bash
-# Register a new user
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john@example.com","password":"password123"}'
-
-# Login
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"john@example.com","password":"password123"}'
-
-# Get all products
-curl http://localhost:3000/products
-
-# Get products with filters
-curl "http://localhost:3000/products?category=electronics&page=1&limit=10"
-
-# Get product by ID
-curl http://localhost:3000/products/1
-
-# Add item to cart (requires authentication token)
-curl -X POST http://localhost:3000/cart/items \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-token>" \
-  -d '{"productId":1,"quantity":2}'
-```
-
-### Using Postman or Thunder Client
-
-Import the API endpoints and test with the provided examples. Make sure to include the `Authorization: Bearer <token>` header for protected routes.
-
-## Database Schema
-
-The database schema is defined in `prisma/schema.prisma`:
-
-- **User** - User accounts with authentication
-- **Product** - Product catalog with full details
-- **CartItem** - Shopping cart items with relationships
-
-Prisma automatically handles:
-- Type safety
-- Database migrations
-- Relationships and joins
-- Indexes and constraints
+- User accounts with authentication
+- Product catalog with full details
+- Shopping cart items with relationships
 
 ## Error Handling
 
-The API returns standardized error responses:
+The API returns standardized error responses with appropriate HTTP status codes:
 
-```json
-{
-  "error": "Error type",
-  "message": "Human-readable error message"
-}
-```
+- 200 OK - Successful request
+- 201 Created - Resource created
+- 400 Bad Request - Invalid request data
+- 401 Unauthorized - Authentication required
+- 403 Forbidden - Insufficient permissions
+- 404 Not Found - Resource not found
+- 422 Unprocessable Entity - Validation errors
+- 500 Internal Server Error - Server error
 
-### HTTP Status Codes
-
-- `200 OK` - Successful request
-- `201 Created` - Resource created successfully
-- `400 Bad Request` - Invalid request data
-- `401 Unauthorized` - Authentication required or invalid token
-- `403 Forbidden` - Insufficient permissions (Admin required)
-- `404 Not Found` - Resource not found
-- `422 Unprocessable Entity` - Validation errors
-- `500 Internal Server Error` - Server error
-
-## Important Notes
+## Notes
 
 - All prices are stored as integers (VND - Vietnamese Dong)
-- Passwords are hashed using bcrypt (10 rounds)
-- JWT tokens expire after 7 days (configurable via `JWT_EXPIRES_IN`)
-- The API follows the specification in `docs/API_DOCUMENTATION.md`
+- Passwords are hashed using bcrypt
+- JWT tokens expire after 7 days
 - Database migrations are managed by Prisma Migrate
-
-## Troubleshooting
-
-### Database Connection Error
-
-- Ensure Docker Compose is running: `docker compose ps`
-- Check database logs: `docker compose logs postgres`
-- Verify `DATABASE_URL` in `.env` file
-
-### Port Already in Use
-
-- Change the `PORT` in `.env` file
-- Or stop the service using port 3000
-
-### Migration Errors
-
-- Ensure database is running: `docker compose up -d`
-- Check `DATABASE_URL` in `.env`
-- Reset database: `docker compose down -v && docker compose up -d`
-
-### Prisma Client Not Generated
-
-- Run: `npm run prisma:generate`
-- Ensure Prisma schema is valid: `npx prisma validate`
 
 ## License
 
