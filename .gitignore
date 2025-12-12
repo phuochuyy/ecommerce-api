@@ -31,3 +31,5 @@ coverage/
 
 # Prisma
 # Keep migrations but ignore generated client in node_modules
+
+/docs
